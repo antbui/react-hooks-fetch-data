@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react'
+import './App.css'
+import useDataApi from './hooks/useDataApi'
+import useHackerNewApi from './hooks/useHackerNewApi'
 
 function App() {
+  const [query, setQuery] = useState('redux')
+  // const [{ data, isLoading, isError }, doFetch] = useHackerNewApi(`https://hn.algolia.com/api/v1/search?query=redux`, {
+  //   hits: [],
+  // })
+  const [{ data, isLoading, isError }, doFetch] = useDataApi(`https://hn.algolia.com/api/v1/search?query=redux`, {
+    hits: [],
+  })
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault()
+          doFetch(`https://hn.algolia.com/api/v1/search?query=${query}`)
+        }}
+      >
+        <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <button type="submit">Search</button>
+      </form>
+      {isError && <div>Something went wrong ...</div>}
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <ul>
+          {data.hits.map((item) => (
+            <li key={item.objectID}>
+              <a href={item.url}>{item.title}</a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  )
 }
 
-export default App;
+export default App
